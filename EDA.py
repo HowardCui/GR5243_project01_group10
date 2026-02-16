@@ -14,7 +14,7 @@ def init_data_check(dataset):
         The raw dataset obtained from the CDC API.
     :return: None
     """
-    df=dataset.copy()
+    df = dataset.copy()
     # dataset dimensions
     print(df.shape)
     print('-')
@@ -30,7 +30,7 @@ def init_data_check(dataset):
     # Check duplicate rows
     print(df.duplicated().sum())
     # Check temporal consistency of records.
-    print((df["yearstart"]!=df["yearend"]).sum())
+    print((df["yearstart"] != df["yearend"]).sum())
     print('-')
     # Identify cases where the primary data is missing but alternative data exists.
     print((df["datavalue"].isna() & df["datavaluealt"].notna()).sum())
