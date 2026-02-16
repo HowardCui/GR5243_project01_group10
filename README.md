@@ -26,6 +26,15 @@ Python version: Python 3.12. Install required packages: pip install pandas reque
 Before performing any preprocessing or formal exploratory analysis, we conducted an initial structural and quality assessment of the raw dataset. This step aims to evaluate data complexity.
 So it mainly checks sample size, variable types, missing value distribution across variables, and potential type inconsistencies
 
+### How to use dataset_preview.py?
+The script provides a function:
+init_data_check(dataset)
+
+#### Parameters
+| Parameter | Type             | Description                               |
+| --------- | ---------------- | ----------------------------------------- |
+| dataset   | pandas.DataFrame | The raw dataset obtained from the CDC API |
+
 ## Data Pre-preprocessing 
 (...)
 ## Conclusion
