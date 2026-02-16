@@ -10,3 +10,4 @@ if __name__ == "__main__":
     print(df.columns)
     print(df.dtypes)
     print(df.isna().mean().sort_values(ascending=False).head(20))
+    #
