@@ -8,6 +8,22 @@ This dataset is accessed through the Socrata Open Data API (SODA2). Since this A
 
 To improve development efficiency, we added a sample loading mode that allows us to load a partial dataset during testing. Additionally, we designed code that saves data locally to avoid repeated API calls while maintaining full reproducibility.
 
+### How to use acquire.py?
+
+The script provides a function:
+get_dataset(use_local=True, sample_n=None)
+
+#### Requirements
+Python version: Python 3.12. Install required packages: pip install pandas requests, pandas
+
+#### Parameters
+| Parameter | Type        | Description                                                |
+| --------- | ----------- | ---------------------------------------------------------- |
+| use_local | bool        | If True, load data from local CSV if it exists             |
+| sample_n  | int or None | If provided, only download first N rows (for fast testing) |
+
+
+
 ## Data Pre-preprocessing 
 (...)
 ## Conclusion
