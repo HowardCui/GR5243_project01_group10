@@ -14,7 +14,7 @@ def get_dataset(use_local=True,sample_n=None):
     """
     get CDC Chronic Disease Indicators data
     Parameters
-    ----------
+    ---
     use_local : bool
         If True, load data from local if exists.
     sample_n : int or None
