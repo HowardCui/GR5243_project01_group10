@@ -22,7 +22,9 @@ Python version: Python 3.12. Install required packages: pip install pandas reque
 | use_local | bool        | If True, load data from local CSV if it exists             |
 | sample_n  | int or None | If provided, only download first N rows (for fast testing) |
 
-
+### Dataset preview
+Before performing any preprocessing or formal exploratory analysis, we conducted an initial structural and quality assessment of the raw dataset. This step aims to evaluate data complexity.
+So it mainly checks sample size, variable types, missing value distribution across variables, and potential type inconsistencies
 
 ## Data Pre-preprocessing 
 (...)
