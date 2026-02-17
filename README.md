@@ -28,7 +28,7 @@ So it mainly checks sample size, variable types, missing value distribution acro
 
 ### How to use dataset_preview.py?
 The script provides functions:
-init_data_check(dataset)
+init_data_check(dataset)<br>
 check_COPD(dataset)
 
 #### Parameters
