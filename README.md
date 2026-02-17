@@ -10,7 +10,8 @@ To improve development efficiency, we added a sample loading mode that allows us
 
 ### How to use acquire.py?
 
-The script provides a function:
+The script provides a function:  
+
 get_dataset(use_local=True, sample_n=None)
 
 #### Requirements
