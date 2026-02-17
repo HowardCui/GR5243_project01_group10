@@ -27,9 +27,12 @@ Before performing any preprocessing or formal exploratory analysis, we conducted
 So it mainly checks sample size, variable types, missing value distribution across variables, and potential type inconsistencies
 
 ### How to use dataset_preview.py?
-The script provides functions:<br>
-init_data_check(dataset)<br>
-check_COPD(dataset)<br>
+The script provides functions:  
+
+init_data_check(dataset)  
+
+check_COPD(dataset) 
+
 
 #### Parameters
 | Parameter | Type             | Description                               |
