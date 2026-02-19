@@ -10,7 +10,7 @@ from acquire import get_dataset
 
 
 def EDA():
-	df = get_dataset(use_local=True, local_path="data/cdc_cleaned_copd.csv")
+	df = pd.read_csv(r'data/cdc_cleaned_copd.csv')
 
 	# ========================
 	# EDA starts here
