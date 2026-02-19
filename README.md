@@ -4,6 +4,9 @@
 (project intro ....)
 
 ## Data Acquisition
+This project utilizes data from the CDC U.S. Chronic Disease Indicators (CDI) dataset, a publicly accessible dataset provided by the Centers for Disease Control and Prevention (CDC).
+The CDI dataset includes multiple health-related indicators across U.S. states, covering topics such as chronic diseases, behavioral risk factors, preventive health measures, and demographic stratifications.
+
 This dataset is accessed through the Socrata Open Data API (SODA2). Since this API can return at most 50,000 records per request, we use $limit and $offset to implement the query. To obtain the complete dataset, we used a while loop and set appropriate delays to request data iteratively.
 
 To improve development efficiency, we added a sample loading mode that allows us to load a partial dataset during testing. Additionally, we designed code that saves data locally to avoid repeated API calls while maintaining full reproducibility.
@@ -30,8 +33,13 @@ Python version: Python 3.12. Install required packages: pip install pandas reque
 - If `use_local=False` and `local_path != "data/cdc_raw.csv"`, a warning is printed because `local_path` is ignored in API mode.
 
 ### Dataset preview
-Before performing any preprocessing or formal exploratory analysis, we conducted an initial structural and quality assessment of the raw dataset. This step aims to evaluate data complexity.
-So it mainly checks sample size, variable types, missing value distribution across variables, and potential type inconsistencies.
+Before performing preprocessing or formal exploratory analysis, we conducted an initial structural and quality assessment of the raw dataset. This step aims to evaluate the dataset’s overall structure, scale, and potential data quality issues.
+
+Specifically, the `init_data_check()` function examines dataset dimensions and column structure, data types across variables, the proportion of missing values per column, the presence of duplicate records, temporal consistency between yearstart and yearend, cases where primary values are missing but alternative values exist, and the distribution of records across health topics. These checks provide an empirical overview of the dataset’s complexity and help identify potential issues that may require further cleaning.
+
+Based on the findings from `init_data_check()`, we observed that the dataset covers a wide range of health topics with varying record counts and data completeness. To conduct a focused yet meaningful analysis, we selected Chronic Obstructive Pulmonary Disease as the primary topic. Chronic Obstructive Pulmonary Disease has a substantial number of records and relatively consistent measurement structures, making it suitable for detailed exploratory analysis.
+
+Thus, we wrote a function called `check_COPD` that focuses on records related to Chronic Obstructive Pulmonary Disease. It evaluates the distribution of COPD-related questions, the consistency of measurement units and value types, and the distribution of numerical indicator values via histograms. This function helps us identify potential inconsistencies and quality issues, which will be beneficial for the subsequent data cleaning process.
 
 Additionally, `data_check_to_justify_cleaning()` performs targeted data quality checks to identify issues that warrant removal during cleaning (e.g., completely empty columns, suspicious data discrepancies, data value footnotes). This function provides empirical justification for each cleaning decision implemented in `clean.py`.
 
