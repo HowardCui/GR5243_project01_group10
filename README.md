@@ -25,12 +25,16 @@ Python version: Python 3.12. Install required packages: pip install pandas reque
 
 ### Dataset preview
 Before performing any preprocessing or formal exploratory analysis, we conducted an initial structural and quality assessment of the raw dataset. This step aims to evaluate data complexity.
-So it mainly checks sample size, variable types, missing value distribution across variables, and potential type inconsistencies
+So it mainly checks sample size, variable types, missing value distribution across variables, and potential type inconsistencies.
+
+Additionally, `data_check_to_justify_cleaning()` performs targeted data quality checks to identify issues that warrant removal during cleaning (e.g., completely empty columns, suspicious data discrepancies, data value footnotes). This function provides empirical justification for each cleaning decision implemented in `clean.py`.
 
 ### How to use dataset_preview.py?
 The script provides functions:  
 
 init_data_check(dataset)  
+
+data_check_to_justify_cleaning(dataset)  
 
 check_COPD(dataset) 
 
@@ -41,7 +45,6 @@ check_COPD(dataset)
 | dataset   | pandas.DataFrame | The raw dataset obtained from the CDC API |
 
 ## Data Pre-preprocessing 
-(...)
 
 ## Data Cleaning
 
