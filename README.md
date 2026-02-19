@@ -29,23 +29,11 @@ Python version: Python 3.12. Install required packages: pip install pandas reque
 ### Dataset preview
 Before performing preprocessing or formal exploratory analysis, we conducted an initial structural and quality assessment of the raw dataset. This step aims to evaluate the dataset’s overall structure, scale, and potential data quality issues.
 
-Specifically, the function examines:init_data_check()
+Specifically, the `init_data_check()` function examines dataset dimensions and column structure, data types across variables, the proportion of missing values per column, the presence of duplicate records, temporal consistency between yearstart and yearend, cases where primary values are missing but alternative values exist, and the distribution of records across health topics. These checks provide an empirical overview of the dataset’s complexity and help identify potential issues that may require further cleaning.
 
-Dataset dimensions and column structure
+Based on the findings from `init_data_check()`, we observed that the dataset covers a wide range of health topics with varying record counts and data completeness. To conduct a focused yet meaningful analysis, we selected Chronic Obstructive Pulmonary Disease as the primary topic. Chronic Obstructive Pulmonary Disease has a substantial number of records and relatively consistent measurement structures, making it suitable for detailed exploratory analysis.
 
-Data types across variables
-
-Proportion of missing values per column
-
-Presence of duplicate records
-
-Temporal consistency (i.e., mismatches between and yearstartyearend)
-
-Cases where primary values are missing but alternative values exist
-
-Distribution of records across health topics
-
-These checks provide an empirical overview of the dataset’s complexity and help identify potential issues that require further cleaning.
+Thus, we wrote a function called `check_COPD` that focuses on records related to Chronic Obstructive Pulmonary Disease. It evaluates the distribution of COPD-related questions, the consistency of measurement units and value types, and the distribution of numerical indicator values via histograms. This function helps us identify potential inconsistencies and quality issues, which will be beneficial for the subsequent data cleaning process.
 
 Additionally, `data_check_to_justify_cleaning()` performs targeted data quality checks to identify issues that warrant removal during cleaning (e.g., completely empty columns, suspicious data discrepancies, data value footnotes). This function provides empirical justification for each cleaning decision implemented in `clean.py`.
 
