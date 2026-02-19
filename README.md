@@ -12,16 +12,22 @@ To improve development efficiency, we added a sample loading mode that allows us
 
 The script provides a function:  
 
-get_dataset(use_local=True, sample_n=None)
+get_dataset(use_local=True, sample_n=None, local_path="data/cdc_raw.csv")
 
 #### Requirements
-Python version: Python 3.12. Install required packages: pip install pandas requests, pandas
+Python version: Python 3.12. Install required packages: pip install pandas requests
 
 #### Parameters
 | Parameter | Type        | Description                                                |
 | --------- | ----------- | ---------------------------------------------------------- |
-| use_local | bool        | If True, load data from local CSV if it exists             |
-| sample_n  | int or None | If provided, only download first N rows (for fast testing) |
+| use_local | bool        | If True, load data from `local_path`; if False, download from API and save to `data/cdc_raw.csv`|
+| sample_n  | int or None | If provided, only load/download first N rows (for fast testing) |
+| local_path | str        | Local CSV path to read when `use_local=True` (default: `data/cdc_raw.csv`) |
+
+#### Behavior Notes
+- If `use_local=True`, `local_path` must exist, otherwise `FileNotFoundError` is raised.
+- If `use_local=False`, the function downloads from API regardless of `local_path` and saves to `data/cdc_raw.csv` (when `sample_n` is `None`).
+- If `use_local=False` and `local_path != "data/cdc_raw.csv"`, a warning is printed because `local_path` is ignored in API mode.
 
 ### Dataset preview
 Before performing any preprocessing or formal exploratory analysis, we conducted an initial structural and quality assessment of the raw dataset. This step aims to evaluate data complexity.

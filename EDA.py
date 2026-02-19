@@ -7,3 +7,19 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 from acquire import get_dataset
+
+
+def EDA():
+	df = get_dataset(use_local=True, local_path="data/cdc_cleaned_copd.csv")
+
+	# ========================
+	# EDA starts here
+	# ========================
+
+	# TODO: add your EDA code below
+	_ = df
+
+
+if __name__ == "__main__":
+	EDA()
+
