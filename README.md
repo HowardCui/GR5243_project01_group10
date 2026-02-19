@@ -27,8 +27,25 @@ Python version: Python 3.12. Install required packages: pip install pandas reque
 | sample_n  | int or None | If provided, only download first N rows (for fast testing) |
 
 ### Dataset preview
-Before performing any preprocessing or formal exploratory analysis, we conducted an initial structural and quality assessment of the raw dataset. This step aims to evaluate data complexity.
-So it mainly checks sample size, variable types, missing value distribution across variables, and potential type inconsistencies.
+Before performing preprocessing or formal exploratory analysis, we conducted an initial structural and quality assessment of the raw dataset. This step aims to evaluate the dataset’s overall structure, scale, and potential data quality issues.
+
+Specifically, the function examines:init_data_check()
+
+Dataset dimensions and column structure
+
+Data types across variables
+
+Proportion of missing values per column
+
+Presence of duplicate records
+
+Temporal consistency (i.e., mismatches between and yearstartyearend)
+
+Cases where primary values are missing but alternative values exist
+
+Distribution of records across health topics
+
+These checks provide an empirical overview of the dataset’s complexity and help identify potential issues that require further cleaning.
 
 Additionally, `data_check_to_justify_cleaning()` performs targeted data quality checks to identify issues that warrant removal during cleaning (e.g., completely empty columns, suspicious data discrepancies, data value footnotes). This function provides empirical justification for each cleaning decision implemented in `clean.py`.
 
