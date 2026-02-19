@@ -42,6 +42,75 @@ check_COPD(dataset)
 
 ## Data Pre-preprocessing 
 (...)
+
+## Data Cleaning
+
+Before formal analysis, we clean the raw dataset to improve data quality and reduce noise. The `clean.py` module provides the main cleaning pipeline.
+
+### How to use clean.py?
+
+The script provides a function:
+
+clean()
+
+This function applies all cleaning steps sequentially and returns a cleaned pandas DataFrame. It also saves the cleaned dataset to `data/cdc_cleaned_copd.csv`.
+
+```python
+from clean import clean
+df_cleaned = clean()
+```
+
+#### Cleaning Steps & Justifications
+
+1. **Filter to COPD-related records**
+   - We keep only records where `topic == "Chronic Obstructive Pulmonary Disease"`
+   - *Justification*: Our analysis focuses specifically on COPD; other disease topics are not relevant
+
+2. **Remove rows with missing primary data (`datavalue`)**
+   - Rows where `datavalue` is NaN are discarded
+   - *Justification*: The primary data value is essential; imputation would be unreliable (see `dataset_preview.py` for column coverage analysis)
+
+3. **Handle alternative data discrepancies**
+   - We compute `datavaluealtdiffpct` only when both `datavalue` and `datavaluealt` are present
+   - We keep rows where this difference is ≤5% or where alternative data is missing
+   - *Justification*: Large discrepancies (>5%) suggest data entry errors; when alternative data is absent, it is safe to ignore (see `data_check_to_justify_cleaning()`)
+
+4. **Remove rows with data value footnotes**
+   - All rows where `datavaluefootnote` is non-null are removed
+   - *Justification*: Footnotes indicate missing or unreliable data values that require extreme caution; excluding them ensures data reliability (see `data_check_to_justify_cleaning()`)
+
+5. **Remove rows with `datavaluetype == "Number"`**
+   - We filter out records where the data value type is "Number" (as opposed to "Crude/Age averages rate")
+   - *Justification*: "Number" type records have multiple units and vastly different scales; they are often duplicated with "Crude/Age averages rate" type, which is more interpretable
+
+6. **Drop unnecessary columns**
+   - **Data quality columns**: `datavaluealt`, `datavaluealtdiffpct`, `datavaluefootnotesymbol`, `datavaluefootnote` (we have already filtered rows with issues)
+   - **Zero-variance columns**: `topic`, `topicid` (all records are COPD, so single value)
+   - **Geolocation**: Too fine-grained for our analysis
+   - **Confidence limits**: `lowconfidencelimit`, `highconfidencelimit` (often missing, hard to use)
+   - *Justification*: These columns either carry no information (after filtering), are redundant, or have too many missing values
+
+7. **Drop redundant ID columns**
+   - For each (name, id) pair (e.g., `topic`/`topicid`, `question`/`questionid`), if the ID is a 1-to-1 mapping to the name, we drop the ID column
+   - **Special case for location**: If `locationid` maps 1-to-1 to `locationabbr` or `locationdesc`, we drop `locationid`. If it maps 1-to-1 to both, we also drop `locationdesc`
+   - *Justification*: Redundant ID columns add no information but increase dimensionality; human-readable names are more interpretable
+
+### Output
+
+The cleaned dataset is saved to `data/cdc_cleaned_copd.csv` and contains only COPD records with:
+- Valid, complete primary data values
+- Consistent, reliable alternative data (if present)
+- No suspicious footnotes or data quality flags
+- Essential columns only, with redundant IDs removed
+
+## Exploratory Data Analysis
+(...)
+
+## Feature Engineering
+(...)
+
 ## Conclusion
 
 ---
+
+
