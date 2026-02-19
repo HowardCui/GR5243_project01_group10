@@ -1,5 +1,5 @@
 # GU5243 Project01
-### Collaborators：Haowen Cui(@HowardCui), Yuhan Guo(@FlamyFlame)
+### Collaborators：Haowen Cui(@HowardCui), Yuhan Guo(@FlamyFlame), Selina Peng(@Skyerrrrrrr)
 ## Project Introduction
 (project intro ....)
 
