@@ -1,7 +1,7 @@
 #!/usr/bin/env python 3.12
 # -*- coding: utf-8 -*-
 # time: 2026/02/13
-# name: Haowen Cui, Yuhan Guo
+# name: Haowen Cui, Yuhan Guo, Selina Peng(sp4550)
 
 import matplotlib.pyplot as plt
 import pandas as pd
