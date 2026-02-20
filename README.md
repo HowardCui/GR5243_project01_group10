@@ -116,7 +116,81 @@ The cleaned dataset is saved to `data/cdc_cleaned_copd.csv` and contains only CO
 (...)
 
 ## Feature Engineering
-(...)
+Overview
+
+This feature‑engineering component transforms the cleaned COPD surveillance data into a state–year‑level feature matrix suitable for modeling.  The raw dataset consists of CDC surveillance estimates for chronic obstructive pulmonary disease (COPD) and related indicators measured across U.S. states and years.  The pipeline loads the data, normalizes units, maps long question names to concise indicator names, constructs a wide pivot table with numerous engineered features, filters out low‑quality or redundant columns, and finally normalizes the feature values.
+
+Key objectives of the feature engineering were to:
+	•	Normalize disparate units so that indicators measured as percentages, cases per 100 000, or cases per 1 000 all reside on a comparable scale.
+	•	Capture demographic variation by computing sex‑ and race‑specific values as well as differences/ratios between demographic groups.
+	•	Encode temporal dynamics through year‑over‑year (YoY) changes for each indicator.
+	•	Reflect relationships observed in exploratory analysis by creating interaction features (e.g., smoking vs. prevalence differences) and regression residuals that measure deviation from overall trends.
+	•	Reduce multicollinearity through targeted pruning of redundant features (log‑transformed versions, subgroup levels when an overall measure exists, ratio features, and highly correlated residual vs. raw variables).
+	•	Standardize features for subsequent modeling by imputing missing values and applying z‑score scaling.
+
+The final engineered dataset has 216 rows (one per state–year) and 28 cleaned, normalized features after pruning and low‑variance filtering.
+
+Data Loading and Preprocessing
+
+The pipeline begins by attempting to load the dataset via a provided get_dataset() function; if unavailable, it reads the CSV file cdc_cleaned_copd.csv.  Only rows with an age‑adjusted value type are retained, and the datavalue column is coerced to numeric.  A unit normalization step scales values based on the reported datavalueunit: percentages are multiplied by 10 to convert to “cases per 1 000”, values reported per 100 000 are multiplied by 0.01, and values already per 1 000 are left unchanged.  In addition, a logarithmic transformation (log1p) of the scaled values is computed to help stabilize heavy‑tailed distributions.  The long question field is mapped to a concise indicator name using INDICATOR_MAP (e.g., “Chronic obstructive pulmonary disease among adults” → COPD_Prevalence).
+
+Feature Construction
+
+Pivot Table and Demographic Features
+
+For each state (locationabbr) and calendar year, the script groups the dataset and constructs a row containing engineered features for each of the six indicators:
+	•	Overall estimate (*_overall) and its log (*_log_overall) – mean of datavalue_scaled and datavalue_log for the overall stratification; if missing, the mean across available stratifications is used.
+	•	Sex‑specific values (*_Male, *_Female) – mean values for male and female stratifications.  A sex difference (_sex_diff) and sex ratio (_sex_ratio) are computed when both values are present.
+	•	Race‑specific values (*_White, *_Black) – mean values for non‑Hispanic White and Black stratifications.  A race difference (_race_diff) and race ratio (_race_ratio) capture disparities.
+	•	Year‑over‑year change (*_yoy_change) – difference between the indicator’s overall value in the current year and the previous year for the same state, with the first year’s change set to zero.
+
+Cross‑indicator Interactions
+
+To encode relationships observed in the exploratory data analysis, several cross‑indicator features are computed:
+	•	Smoking vs. COPD prevalence – difference and ratio between overall smoking rate and COPD prevalence (Smoking_vs_Prevalence_Diff and Smoking_vs_Prevalence_Ratio).
+	•	Mortality (any vs. underlying cause) – difference and ratio between COPD mortality counts when counted as any cause and when counted only as underlying cause (Mortality_Any_vs_Underlying_Diff and Mortality_Any_vs_Underlying_Ratio).
+	•	Hospitalization (principal vs. any diagnosis) – difference and ratio between hospitalization rates where COPD is the principal diagnosis and where it appears anywhere on the discharge summary (Hospitalization_Principal_vs_Any_Diff and Hospitalization_Principal_vs_Any_Ratio).
+
+Residual Features
+
+Linear regression is used to compute residual features that represent deviation from global trends.  For each specified pair of indicators, a simple linear model is fitted across all state–year observations, and the residuals (actual minus predicted values) are stored:
+	•	Smoking_Mortality_Underlying_Residual – deviation of mortality (underlying cause) from what would be expected given smoking rates.
+	•	Smoking_Mortality_Any_Residual – deviation of mortality (any cause) from smoking rates.
+	•	Smoking_Prevalence_Residual – deviation of COPD prevalence from smoking rates.
+	•	Prevalence_Mortality_Residual – deviation of mortality (underlying cause) from COPD prevalence.
+
+These residuals capture whether a state’s mortality or prevalence is unusually high or low after accounting for smoking prevalence, a relationship highlighted in the EDA scatter plots.
+
+Feature Pruning and Filtering
+
+Because the initial pivot table contains many highly correlated columns, a pruning step removes obvious sources of multicollinearity:
+	•	Log versions (*_log_overall) are dropped since they correlate strongly with the corresponding original values.
+	•	Subgroup level columns (male, female, White, Black) are removed when a corresponding overall value exists; disparities are captured instead through difference features.
+	•	Ratio features (sex and race ratios, interaction ratios) are eliminated to reduce instability; difference features are retained.
+	•	Interaction diff columns like Hospitalization_Principal_vs_Any_Diff are removed when the two underlying hospitalization levels are kept because the diff is almost a deterministic transformation.
+	•	Raw vs. residual: when KEEP_RESIDUAL_FEATURES is False (option B), raw indicators such as Smoking_Rate_overall, COPD_Prevalence_overall, Mortality_Underlying_overall and Mortality_Any_Cause_overall are retained while residuals are dropped to avoid multicollinearity.  Conversely, when set to True, residuals are kept and raw indicators are pruned.
+
+After pruning redundant columns, the pipeline imputes any remaining missing values with column means (including replacing infinities with NaNs beforehand) and identifies low‑variance or near‑constant features.  Columns with very small variance or rare binary distributions (e.g., nearly all zeros or ones) are dropped.  The filtering criteria include a variance threshold and, for binary features, a mean between 1 % and 99 % to avoid rare categories.
+
+Multicollinearity Diagnostics
+
+With FAST_MODE disabled, the script calculates a Pearson correlation matrix and the Variance Inflation Factor (VIF) for each feature:
+	•	The correlation check reports pairs of features with |correlation| ≥ 0.95.  Initially many pairs exceeded this threshold, such as smoking rate vs. smoking–prevalence difference, but after pruning only one such pair remains.
+	•	The VIF check measures how much each feature’s variance is inflated by correlations with other features.  Before pruning, the highest VIF values exceeded 60 000 for hospitalization variables; after pruning and residual/ratio removal, the VIF values decrease substantially (e.g., Smoking Rate overall ~ 218, Smoking vs. prevalence difference ~ 188).  Most remaining features have VIF < 10, indicating acceptable collinearity for linear models.
+
+Final Feature Set and Normalization
+
+After pruning and filtering, the feature matrix consists of 28 columns (plus the locationabbr and year identifiers).  The remaining features include:
+	•	Overall values for each indicator (COPD_Prevalence_overall, Smoking_Rate_overall, Mortality_Underlying_overall, Mortality_Any_Cause_overall, Hospitalization_Any_Dx_overall, Hospitalization_Principal_Dx_overall) and their YoY changes.
+	•	Sex and race difference features (e.g., Mortality_Any_Cause_sex_diff, Mortality_Underlying_race_diff).
+	•	Cross‑indicator differences (Smoking_vs_Prevalence_Diff, Mortality_Any_vs_Underlying_Diff).
+	•	YoY changes for hospitalization indicators.
+
+Finally, all numeric features are standardized using z‑score normalization via StandardScaler.  The resulting table, normalized_df, retains the state and year columns and appends a suffix _z to each feature name.  The final pivot and normalized tables have shapes (216, 28), indicating 216 state‑year observations and 26 engineered features (excluding identifiers).
+
+Summary
+
+The feature‑engineering pipeline transforms the CDC COPD surveillance data into a comprehensive set of state‑year‑level features.  By normalizing units, encoding demographic differences, constructing interaction and residual features informed by EDA findings, and carefully pruning highly correlated or redundant columns, the process balances richness of information with model‑readiness.  The resulting dataset captures temporal trends, demographic disparities, and relationships between smoking, COPD prevalence, mortality, and hospitalization while controlling multicollinearity—providing a solid foundation for subsequent statistical modeling and inferential analyses.
 
 ## Conclusion
 
