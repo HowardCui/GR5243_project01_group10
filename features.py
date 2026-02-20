@@ -46,8 +46,8 @@ INDICATOR_MAP: dict[str, str] = {
 @dataclass
 class FeatureEngineeringConfig:
     save_csv: bool = False
-    pivot_csv_path: str = "processed/cdc_pivot_features.csv"
-    normalized_csv_path: str = "processed/cdc_normalized_features.csv"
+    pivot_csv_path: str = "data/cdc_pivot_features.csv"
+    normalized_csv_path: str = "data/cdc_normalized_features.csv"
 
 
 def load_data() -> pd.DataFrame:

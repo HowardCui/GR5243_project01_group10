@@ -284,6 +284,82 @@ Summary
 
 The feature‑engineering pipeline transforms the CDC COPD surveillance data into a comprehensive set of state‑year‑level features.  By normalizing units, encoding demographic differences, constructing interaction and residual features informed by EDA findings, and carefully pruning highly correlated or redundant columns, the process balances richness of information with model‑readiness.  The resulting dataset captures temporal trends, demographic disparities, and relationships between smoking, COPD prevalence, mortality, and hospitalization while controlling multicollinearity—providing a solid foundation for subsequent statistical modeling and inferential analyses.
 
+## Complete Pipeline
+
+To run the entire workflow in sequence (data preview → cleaning → EDA → feature engineering), use the `pipeline.py` module.
+
+### How to use pipeline.py?
+
+The script provides a function:
+
+```python
+pipeline(test_acquire_from_URL=False)
+```
+
+#### Requirements
+- Python version: Python 3.12
+- Required packages: All dependencies from `acquire.py`, `dataset_preview.py`, `clean.py`, `EDA.py`, and `features.py`
+- Input data: `data/cdc_raw.csv` (will be created on first run with `test_acquire_from_URL=True`)
+
+#### Parameters
+
+| Parameter | Type | Default | Description |
+| --------- | ---- | ------- | ----------- |
+| test_acquire_from_URL | bool | False | If True, fetch a sample of 100k rows from CDC API using `get_dataset(use_local=False, sample_n=100000)` for testing. If False, skip acquisition and use local data. |
+
+#### Usage Examples
+
+**Option 1: Use local data (recommended for development)**
+```python
+from pipeline import pipeline
+pipeline(test_acquire_from_URL=False)
+```
+
+**Option 2: Test with fresh data from CDC API (100k rows)**
+```python
+from pipeline import pipeline
+pipeline(test_acquire_from_URL=True)
+```
+
+**Option 3: Run from command line**
+```bash
+python pipeline.py
+```
+
+#### Output
+
+The pipeline executes each step sequentially and prints formatted output separators for clarity:
+
+```
+######## Test DATASET_PREVIEW #########
+[dataset_preview output...]
+#################
+
+######## Test CLEAN #########
+[clean output...]
+#################
+
+######## Test EDA #########
+[EDA output and plot generation...]
+#################
+
+######## Test FEATURE_ENGINEERING #########
+Feature engineering complete. Pivot shape: (216, 28), Normalized shape: (216, 28)
+#################
+```
+
+Generated outputs include:
+- Cleaned dataset: `data/cdc_cleaned_copd.csv`
+- EDA visualizations: `eda_png/P1A.png`, `eda_png/P1B.png`, ..., `eda_png/P4B.png` (12 plots total)
+- Feature matrices: `processed/cdc_pivot_features.csv`, `processed/cdc_normalized_features.csv` (if `config.save_csv=True`)
+
+#### Workflow Steps
+
+1. **Data Preview** (optional acquisition): Loads and examines raw data structure, quality issues, and COPD-specific distributions
+2. **Data Cleaning**: Filters to COPD records, removes low-quality rows, and retains essential columns
+3. **Exploratory Data Analysis**: Generates 12 visualizations exploring distributions, trends, demographics, and relationships
+4. **Feature Engineering**: Creates state-year feature matrix with 28 features, handles multicollinearity, and normalizes values
+
 ## Conclusion
 
 ---
