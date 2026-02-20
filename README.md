@@ -113,7 +113,99 @@ The cleaned dataset is saved to `data/cdc_cleaned_copd.csv` and contains only CO
 - Essential columns only, with redundant IDs removed
 
 ## Exploratory Data Analysis
-(...)
+
+After cleaning, we conduct a comprehensive exploratory data analysis (EDA) to understand the distributions, trends, and relationships among COPD indicators. The `EDA.py` module generates visualizations across four analytical components.
+
+### How to use EDA.py?
+
+The script is designed to run as a standalone executable:
+
+```bash
+python EDA.py
+```
+
+Alternatively, import and call the main function:
+
+```python
+from EDA import EDA
+EDA()
+```
+
+#### Requirements
+- Python version: Python 3.12
+- Required packages: `pandas`, `numpy`, `matplotlib`, `seaborn`, `scipy`
+- Input data: `data/cdc_cleaned_copd.csv` (output from cleaning step)
+
+#### Output
+All visualizations are saved to the `eda_png/` directory as PNG files (12 plots total):
+- **PART 1**: P1A, P1B, P1C, P1D, P1E, P1F (6 plots)
+- **PART 2**: P2A, P2B (2 plots)
+- **PART 3**: P3A, P3B (2 plots)
+- **PART 4**: P4A, P4B (2 plots)
+
+Console output includes summary statistics, missing value counts, and correlation coefficients with p-values.
+
+### Analysis Components
+
+#### PART 1: Individual Indicator Distributions & Demographics
+
+Examines each of the six COPD indicators in isolation:
+
+**P1A: Distributions** — Histograms for each indicator (COPD Prevalence, Smoking Rate, Mortality underlying/any cause, Hospitalizations) with mean and median lines overlaid. Helps identify the distribution shape, central tendency, and spread across all state-year observations.
+
+**P1B: Yearly Trends** — Line plots with 95% confidence bands showing how each indicator changes over time (overall, age-adjusted). Reveals temporal patterns and whether indicators are rising, falling, or stable.
+
+**P1C: Sex Comparison** — Boxplots comparing male vs. female values for each indicator. Identifies sex-based disparities in COPD burden.
+
+**P1D, P1E, P1F: Race/Ethnicity Comparison** — Three alternative visualizations (barplot with median + 95% CI, violinplot for full distribution, boxplot for quartiles and outliers) comparing indicators across race/ethnicity groups. All use consistent color mapping for each racial/ethnic group across all six indicators. Highlights racial/ethnic disparities in COPD burden.
+
+**Why**: These univariate and stratified views provide foundational understanding of each indicator's range, variability, temporal trends, and demographic heterogeneity before examining relationships between indicators.
+
+#### PART 2: Correlation & Multivariate Analysis
+
+Examines relationships between all six indicators at the state-year level:
+
+**P2A: Pearson Correlation Heatmap** — Lower-triangular heatmap of Pearson correlations between all indicators (computed from state-year aggregated data). Values range from −1 to +1; colors encode strength and direction.
+
+**P2B: Pairplot** — Scatter plots of key indicator pairs with marginal distributions (KDE on diagonal). Points are colored by year to detect temporal patterns. Shows pairwise relationships visually.
+
+**Why**: Correlation analysis identifies which indicators move together (e.g., smoking and mortality) and which are independent, informing feature engineering and modeling assumptions. Stratifying by year reveals if relationships are stable over time.
+
+#### PART 3: Smoking vs. Mortality Deep Dive
+
+Focuses on the hypothesized relationship between smoking behavior and mortality outcomes:
+
+**P3A: Smoking Rate vs. Mortality Scatter Plots** — Two side-by-side scatter plots (mortality from underlying cause and from any cause) with smoking rate on x-axis. Points colored by year; OLS regression line with r and p-value reported. State abbreviations labeled for outliers (85th percentile or greater on either axis).
+
+**P3B: Smoking vs. Prevalence Scatter** — Scatter plot of smoking rate against COPD prevalence with OLS line and correlation statistics.
+
+**P3C: Correlation Summary Table** — Prints to console a table of Pearson r, p-value, and sample size for five key pairs: smoking→prevalence, smoking→mortality (underlying/any), and prevalence→mortality (underlying/any). Statistical significance flagged with asterisks (*, **, ***, for p < 0.05, 0.01, 0.001).
+
+**Why**: Smoking is a primary risk factor for COPD; this analysis quantifies the strength and significance of associations. Outlier identification highlights states with unusual combinations (e.g., low smoking but high mortality, or vice versa), suggesting unmeasured confounders or data anomalies.
+
+#### PART 4: Hierarchical Correlation by Demographics
+
+Repeats key analyses stratified by sex and race/ethnicity:
+
+**P4A: Smoking vs. Mortality by Sex** — Two smoking-mortality scatter plots (one per sex: Male, Female) with OLS lines and correlations. Tests whether the smoking-mortality relationship differs by sex.
+
+**P4B: Prevalence vs. Mortality by Race/Ethnicity** — Three prevalence-mortality scatter plots (one per race/ethnicity: White non-Hispanic, Black non-Hispanic, Hispanic) with OLS lines and correlations. Tests whether prevalence-mortality relationships differ across racial/ethnic groups.
+
+**Why**: Demographic stratification reveals whether aggregate patterns mask important subgroup heterogeneity. For example, the smoking-mortality link may be stronger for one sex, or the prevalence-mortality relationship may vary by race, reflecting differences in healthcare access, comorbidities, or disease severity.
+
+### Data Filtering & Aggregation
+
+- Only **age-adjusted** records are included (filtered by `datavaluetype.str.startswith("Age-adjusted")`)
+- For PART 1 univariate plots: data stratified by `stratification1` (e.g., "Overall", "Male", "Female", race categories)
+- For PART 2–4 correlations: data aggregated to **state-year level** by taking the mean of all records matching (locationabbr, yearstart, question)
+- Missing values computed via **listwise deletion** (pairwise comparisons drop rows with any NaN in the target columns)
+
+### Technical Notes
+
+- **Visualization Library**: Uses `seaborn` for statistical graphics (heatmaps, boxplots, pairplots) and `matplotlib` for custom layouts
+- **Statistics**: `scipy.stats.linregress()` for OLS fitting and correlation inference; `scipy.stats.pearsonr()` for bivariate Pearson correlations
+- **Color Palettes**: Consistent colors across plots to aid interpretation (blues for overall/male, oranges for female, etc.)
+- **Figure Management**: All plots saved with `bbox_inches='tight'` and closed after saving to prevent memory bloat; console messages track file paths
 
 ## Feature Engineering
 Overview
