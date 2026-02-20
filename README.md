@@ -58,8 +58,6 @@ check_COPD(dataset)
 | --------- | ---------------- | ----------------------------------------- |
 | dataset   | pandas.DataFrame | The raw dataset obtained from the CDC API |
 
-## Data Pre-preprocessing 
-
 ## Data Cleaning
 
 Before formal analysis, we clean the raw dataset to improve data quality and reduce noise. The `clean.py` module provides the main cleaning pipeline.
