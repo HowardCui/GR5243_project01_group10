@@ -199,7 +199,7 @@ fig.suptitle("Distribution of Each Indicator", fontsize=12)
 plt.tight_layout()
 save(fig, "P1A_distributions_by_question.png")
 
-# 1-B. 各指标按年份趋势
+# 1-B. 
 fig, axes = plt.subplots(2, 3, figsize=(16, 9))
 axes = axes.flatten()
 for i, q in enumerate(questions):
@@ -218,6 +218,8 @@ for i, q in enumerate(questions):
 fig.suptitle("Trend of Each Indicator by year (Overall, Age-adjusted)", fontsize=12)
 plt.tight_layout()
 save(fig, "yearly_trends_by_question.png")
+
+
 # 1-C. Sex compare
 fig, axes = plt.subplots(2, 3, figsize=(16, 9))
 axes = axes.flatten()
@@ -227,7 +229,10 @@ for i, q in enumerate(questions):
     if sub.empty:
         ax.set_visible(False); continue
     sns.boxplot(data=sub, x="stratification1", y="datavalue",
-                order=["Male", "Female"], palette=["#4C72B0","#DD8452"], ax=ax, width=0.5)
+                order=["Male", "Female"], 
+				palette=["#4C72B0","#DD8452"], 
+				ax=ax, 
+				width=0.5)
     ax.set_title(Q_SHORT[q].replace("\n", " "), fontsize=9, fontweight="bold")
     ax.set_xlabel("")
     ax.set_ylabel(Q_UNIT[q], fontsize=8)
@@ -239,6 +244,7 @@ fig.suptitle("Sex Compare\n(Age-adjusted)", fontsize=12)
 plt.tight_layout()
 save(fig, "P1C_sex_comparison_by_question.png")
 
+
 # 1-D
 fig, axes = plt.subplots(2, 3, figsize=(18, 10))
 axes = axes.flatten()
@@ -248,8 +254,13 @@ for i, q in enumerate(questions):
     if sub.empty:
         ax.set_visible(False); continue
     race_order = sub.groupby("stratification1")["datavalue"].median().sort_values(ascending=False).index
-    sns.barplot(data=sub, x="stratification1", y="datavalue", order=race_order,
-                estimator=np.median, errorbar=("ci", 95), palette="Set2", ax=ax)
+    sns.barplot(data=sub, 
+				x="stratification1", 
+				y="datavalue", 
+				order=race_order,
+                estimator=np.median, 
+				errorbar=("ci", 95), 
+				palette="Set2", ax=ax)
     ax.set_title(Q_SHORT[q].replace("\n", " "), fontsize=9, fontweight="bold")
     ax.set_xlabel("")
     ax.set_ylabel(Q_UNIT[q], fontsize=8)
@@ -260,11 +271,6 @@ save(fig, "P1D_race_comparison_by_question.png")
 
 
 # PART 2:
-print("\n" + "="*65)
-print("PART 2: 跨指标相关性（state × year 级别）")
-print("注意：各列单位不同（%, /100k, /1000），但相关性分析看的是排名关系，合理")
-print("="*65)
-
 # Pivot：(state, year) ，6 questions
 pivot = (df[df["stratification1"] == "Overall"]
          .groupby(["locationabbr", "yearstart", "question"])["datavalue"]
@@ -277,6 +283,7 @@ print(f"\nPivot shape: {pivot.shape}  (state-year observations)")
 print(f"Missing values per indicator:")
 print(pivot.iloc[:, 2:].isna().sum().to_string())
 
+
 # 2-A. heatmap
 corr = pivot.iloc[:, 2:].corr(method="pearson")
 fig, ax = plt.subplots(figsize=(10, 8))
@@ -285,16 +292,22 @@ sns.heatmap(corr, annot=True, fmt=".2f", cmap="RdYlGn", center=0,
             vmin=-1, vmax=1, linewidths=0.5, ax=ax,
             annot_kws={"size": 10, "weight": "bold"},
             mask=mask)
+	
 ax.set_title("Pearson_related_matrix\n(state-year level, Overall, Age-adjusted)",
              fontsize=12, fontweight="bold")
+
 ax.set_xticklabels(ax.get_xticklabels(), rotation=30, ha="right", fontsize=9)
+
 ax.set_yticklabels(ax.get_yticklabels(), rotation=0, fontsize=9)
+
 plt.tight_layout()
 save(fig, "P2A_correlation_heatmap.png")
 
 # 2-B. Pairplot(core)
-key_cols = [c for c in pivot.columns if any(k in c for k in
+key_cols = [c for c in pivot.columns 
+			if any(k in c for k in
             ["COPD Prevalence", "Smoking", "Mortality\n(underlying", "Hosp Any"])]
+
 # fallback: just use first 4 indicator columns
 if len(key_cols) < 4:
     key_cols = list(pivot.columns[2:6])
@@ -302,7 +315,8 @@ if len(key_cols) < 4:
 pair_df = pivot[key_cols + ["yearstart"]].dropna()
 pair_df["yearstart"] = pair_df["yearstart"].astype(str)
 
-g = sns.pairplot(pair_df, vars=key_cols, hue="yearstart",
+g = sns.pairplot(pair_df, vars=key_cols,
+				 hue="yearstart",
                  plot_kws={"alpha": 0.6, "s": 40},
                  diag_kind="kde", corner=True)
 g.figure.suptitle("Core Pairplot\n(Colored by year)", y=1.01, fontsize=11)
@@ -321,6 +335,7 @@ prev_col     = "COPD Prevalence (%)"
 # only use complete data
 plot_df = pivot[[smoke_col, mort_col, mort_any_col, prev_col, "locationabbr", "yearstart"]].dropna()
 print(f"  Complete cases for smoking-mortality analysis: {len(plot_df)}")
+
 
 # 3-A. 
 fig, axes = plt.subplots(1, 2, figsize=(14, 6))
@@ -353,7 +368,8 @@ for ax, (mort, title) in zip(axes, [
             ax.annotate(row["locationabbr"],
                         (row[smoke_col], row[mort]),
                         fontsize=6, alpha=0.7,
-                        xytext=(3, 3), textcoords="offset points")
+                        xytext=(3, 3),
+						textcoords="offset points")
 
 fig.suptitle("Smoking rate vs. Mortality rate\n(state-year, Overall, Age-adjusted)", fontsize=12)
 plt.tight_layout()
@@ -379,11 +395,11 @@ save(fig, "P3B_smoking_vs_prevalence_scatter.png")
 
 # 3-C. 
 corr_pairs = [
-    (smoke_col, prev_col,     "吸烟率 → COPD患病率"),
-    (smoke_col, mort_col,     "吸烟率 → 死亡率(主因)"),
-    (smoke_col, mort_any_col, "吸烟率 → 死亡率(任意)"),
-    (prev_col,  mort_col,     "COPD患病率 → 死亡率(主因)"),
-    (prev_col,  mort_any_col, "COPD患病率 → 死亡率(任意)"),
+    (smoke_col, prev_col,     "smoke rate → COPD prevalence"),
+    (smoke_col, mort_col,     "smoke rate → Mortality rate (primary cause)"),
+    (smoke_col, mort_any_col, "smoke rate → Mortality rate (Any case)"),
+    (prev_col,  mort_col,     "COPD prevalence→ Mortality rate (primary cause)"),
+    (prev_col,  mort_any_col, "COPD prevalence → Mortality rate (Any case)"),
 ]
 print("\n  [Pearson r — state-year level, listwise deletion]")
 print(f"  {'Pair':<35}  {'r':>6}  {'p-value':>10}  {'n':>5}")
@@ -414,6 +430,7 @@ for ax, sex in zip(axes, ["Male", "Female"]):
                  .rename("mortality"))
     merged = pd.concat([sex_smoke, sex_mort], axis=1).dropna()
 
+
     ax.scatter(merged["smoking"], merged["mortality"], alpha=0.6, s=40,
                color="#4C72B0" if sex == "Male" else "#DD8452")
     if len(merged) > 2:
@@ -423,13 +440,16 @@ for ax, sex in zip(axes, ["Male", "Female"]):
                 label=f"r={r:.2f}, p={p:.3f}")
     ax.set_title(f"{sex}: Smoking Rate vs Mortality (Underlying)", fontsize=10, fontweight="bold")
     ax.set_xlabel("Smoking Rate (%)")
+
     ax.set_ylabel("Mortality (cases per 100,000)")
+
     ax.legend(fontsize=9)
 	    print(f"  {sex}: n={len(merged)}, r={r:.3f}, p={p:.4f}")
 
 fig.suptitle("Smoking rate vs. Mortality rate\n(Sex, Age-adjusted)", fontsize=12)
 plt.tight_layout()
 save(fig, "P4A_smoking_mortality_by_sex.png")
+
 
 # 4-B. The prevalence and mortality rates of COPD among various ethnic groups
 races = ["White, non-Hispanic", "Black, non-Hispanic", "Hispanic"]
@@ -438,12 +458,15 @@ for ax, race in zip(axes, races):
     r_prev = (df[(df["question"].str.contains("disease among adults"))
                  & (df["stratification1"] == race)]
               .groupby(["locationabbr","yearstart"])["datavalue"].mean().rename("prev"))
+
     r_mort = (df[(df["question"].str.contains("mortality.*underlying cause", regex=True))
                  & (df["stratification1"] == race)]
               .groupby(["locationabbr","yearstart"])["datavalue"].mean().rename("mort"))
+
     merged = pd.concat([r_prev, r_mort], axis=1).dropna()
 
     ax.scatter(merged["prev"], merged["mort"], alpha=0.6, s=40, color="#8172B2")
+
     if len(merged) > 2:
         slope, intercept, r_val, p, _ = stats.linregress(merged["prev"], merged["mort"])
         xline = np.linspace(merged["prev"].min(), merged["prev"].max(), 100)
@@ -451,12 +474,14 @@ for ax, race in zip(axes, races):
                 label=f"r={r_val:.2f}, p={p:.3f}")
         ax.legend(fontsize=9)
         print(f"  {race}: n={len(merged)}, r={r_val:.3f}, p={p:.4f}")
+		
     ax.set_title(race, fontsize=10, fontweight="bold")
     ax.set_xlabel("COPD Prevalence (%)")
     ax.set_ylabel("Mortality (/100k)")
 fig.suptitle("Prevalence vs. Mortality of COPD\n(Race/Ethnicity)", fontsize=12)
 plt.tight_layout()
 save(fig, "P4B_prevalence_mortality_by_race.png")
+
 
 print("\n" + "="*65)
 print("done:")
