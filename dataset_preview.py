@@ -1,7 +1,7 @@
 #!/usr/bin/env python 3.12
 # -*- coding: utf-8 -*-
 # time: 2026/02/16
-# name: Haowen Cui, Yuhan Guo, Selina Peng(sp4550)
+# name: Haowen Cui, Yuhan Guo, Selina Peng(sp4550), Shengbo Yi
 
 from acquire import get_dataset
 import matplotlib.pyplot as plt
